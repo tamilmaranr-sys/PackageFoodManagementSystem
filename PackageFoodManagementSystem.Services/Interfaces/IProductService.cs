@@ -9,11 +9,19 @@ namespace PackageFoodManagementSystem.Services.Interfaces
         IEnumerable<Product> GetAllProducts();
         Task<IEnumerable<Product>> GetAllProductsAsync();
         Product GetProductById(int id);
+
+        // ADDED: Async version for inventory synchronization
+        Task<Product> GetProductByIdAsync(int id);
+
         void CreateProduct(Product product);
         void UpdateProduct(Product product);
+
+        // ADDED: Async version to support BatchService updates
+        Task UpdateProductAsync(Product product);
+
         void DeleteProduct(int id);
 
-        // ADDED TO RESOLVE CS0535
+        // INTERFACE MATCHING METHODS
         IEnumerable<Product> GetMenuForCustomer();
         void CreateNewProduct(Product product);
         void RemoveProduct(int id);

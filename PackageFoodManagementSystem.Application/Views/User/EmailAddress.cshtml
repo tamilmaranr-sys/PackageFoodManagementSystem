@@ -85,18 +85,61 @@
 </div>
 
 <style>
+    /* === Remove all card/white backgrounds on this page === */
+
+    /* Left sidebar card */
+    .card,
+    .card.border-0,
+    .shadow-sm,
+    .shadow,
+    .shadow-lg {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* Email cards */
     .email-card {
-        transition: all 0.3s ease;
-        border: 1px solid transparent;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
         .email-card:hover {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
-            border-color: #e9ecef;
         }
-</style>
 
+    /* Remove bg-light from icon circles */
+    .bg-light {
+        background-color: transparent !important;
+    }
+
+        /* Remove white background from the info box at the bottom */
+        .bg-light.rounded-3 {
+            background-color: transparent !important;
+            border-color: transparent !important;
+        }
+
+    /* Remove border of the info box */
+    .border {
+        border: none !important;
+    }
+
+    /* Ensure the container and columns don't introduce white background */
+    .container, .row, .col-md-3, .col-md-9 {
+        background-color: transparent !important;
+    }
+
+    .email-card {
+        background: rgba(255,255,255,0.05) !important;
+        backdrop-filter: blur(8px);
+        border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+    }
+</style>
 <script>
     function addNewEmail() {
         const email = prompt("Enter your alternate email address:");

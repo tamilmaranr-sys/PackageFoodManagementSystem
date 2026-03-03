@@ -1,23 +1,16 @@
 ﻿@model IEnumerable<PackageFoodManagementSystem.Repository.Models.Product>
 
 @{
-
     ViewData["Title"] = "Menu";
 
-    // Define categories once at the top to avoid repeated logic
-
+    // The KEY (first part) must match exactly what is in your database 'Category' column
+    // The VALUE (second part) is what appears on the button text
     var categories = new Dictionary<string, string> {
-
-        { "Vegetables and Fruits", "Veg & Fruits" },
-
-        { "Dairy and Eggs", "Dairy & Eggs" },
-
-        { "Snacks and Drinks", "Snacks & Drinks" },
-
-        { "Meat and Seafoods", "Meat & Fish" }
-
+        { "Veg & Fruits", "Veg & Fruits" },
+        { "Dairy & Eggs", "Dairy & Eggs" },
+        { "Snacks & Drinks", "Snacks & Drinks" },
+        { "Meat & Fish", "Meat & Fish" }
     };
-
 }
 
 @section Scripts {

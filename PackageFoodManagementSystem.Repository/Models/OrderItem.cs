@@ -53,7 +53,6 @@ namespace PackageFoodManagementSystem.Repository.Models
         public string? ProductNameSnapshot { get; set; }
 
         public DateTime CreatedOn { get; set; } = DateTime.Now;
-        public bool IsCancelled { get; set; }
 
         // Navigation Properties
 

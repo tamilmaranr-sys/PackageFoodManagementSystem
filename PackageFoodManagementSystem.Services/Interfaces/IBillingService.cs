@@ -11,5 +11,6 @@ namespace PackageFoodManagementSystem.Services.Interfaces
     {
         Bill GenerateBill(int orderId);
         void MakePayment(Payment ppayment);
+        void UpdateBillStatusByOrder(int orderId, string v);
     }
 }

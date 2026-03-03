@@ -27,6 +27,6 @@ namespace PackageFoodManagementSystem.Repository.Models
         // Added this collection to link Products to Batches
         // This resolves the red lines in Details.cshtml
         public virtual ICollection<Batch> Batches { get; set; } = new List<Batch>();
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
     }
 }

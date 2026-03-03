@@ -2,8 +2,7 @@
 
 namespace PackageFoodManagementSystem.Controllers
 {
-    // In StoreController.cs
-    public class StoreController : Controller // Rename this
+    public class StoreController : Controller
     {
         public IActionResult AddProduct()
         {

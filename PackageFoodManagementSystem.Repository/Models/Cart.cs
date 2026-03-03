@@ -11,7 +11,6 @@ namespace PackageFoodManagementSystem.Repository.Models
     public class Cart
     {
         public int CartId { get; set; }
-        public int UserId { get; set; }
 
         public int UserAuthenticationId { get; set; }
         public UserAuthentication UserAuthentication { get; set; }

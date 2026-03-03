@@ -131,10 +131,12 @@
                 transform: translateY(-3px);
             }
     </style>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="d-flex flex-column min-vh-100">
 
+    <!-- Header -->
     <header class="app-header sticky-top bg-white shadow-sm">
         <nav class="navbar navbar-expand-lg px-4 py-2">
             <div class="container-fluid">
@@ -143,14 +145,14 @@
                     <span class="brand fw-bold text-orange ms-2" style="font-size: 22px;">ALWAYZZZ FRESH</span>
                 </a>
 
-                <div class="location-box d-flex align-items-center cursor-pointer me-auto" data-bs-toggle="modal" data-bs-target="#locationModal">
+                @* <div class="location-box d-flex align-items-center cursor-pointer me-auto" data-bs-toggle="modal" data-bs-target="#locationModal">
                     <div>
                         <div class="fw-bold lh-1 mb-1" style="font-size: 0.8rem;">Delivery in 15 minutes</div>
                         <div class="small text-muted text-truncate" style="max-width: 180px;">
                             <span id="displayLocation">Select Location</span> <i class="fa-solid fa-caret-down ms-1"></i>
                         </div>
                     </div>
-                </div>
+                </div> *@
 
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item me-3"><a class="nav-link fw-semibold" asp-controller="Home" asp-action="Index">Home</a></li>
@@ -204,8 +206,7 @@
             <span class="cursor-pointer text-muted" onclick="closeUserMenu()">×</span>
         </div>
         <ul class="popup-list">
-            <li onclick="location.href='/User/Dashboard'"><i class="fa-solid fa-user-circle"></i> My Profile</li>
-            <li onclick="location.href='/Cart/MyBasket'"><i class="fa-solid fa-cart-shopping"></i> My Basket</li>
+            <li onclick="location.href='/User/EditProfile'"><i class="fa-solid fa-user-circle"></i> My Profile</li>
             <li onclick="location.href='/User/MyOrders'"><i class="fa-solid fa-shopping-bag"></i> My Orders</li>
             <li onclick="location.href='/User/ContactUs'"><i class="fa-solid fa-headset"></i> Contact Us</li>
             <li class="logout mt-2 border-top">
@@ -228,23 +229,32 @@
         </ul>
     </div>
 
+    <!-- Main -->
     <main role="main" class="flex-grow-1">
         @RenderBody()
     </main>
 
+    <!-- Footer (Updated layout & spacing) -->
     <footer class="bg-dark text-white pt-5 pb-3 mt-auto">
         <div class="container">
-            <div class="row gy-4 mb-5">
-                <div class="col-lg-4">
+
+            <!-- Equal-spaced columns with responsive behavior -->
+            <div class="row gy-4 mb-5 text-center text-md-start justify-content-between">
+                <!-- Column 1 -->
+                <div class="col-lg-4 col-md-6 mb-4">
                     <h4 class="fw-bold text-orange mb-4">ALWAYZZZ FRESH</h4>
-                    <p class="text-white-50">High-quality farm-fresh produce delivered in just 15-30 minutes directly to your doorstep.</p>
-                    <div class="d-flex gap-3 mt-4">
+                    <p class="text-white-50">
+                        High-quality farm-fresh produce delivered in just 15-30 minutes directly to your doorstep.
+                    </p>
+                    <div class="d-flex gap-3 mt-4 justify-content-center justify-content-md-start">
                         <a href="#" class="social-icon-box"><i class="fa-brands fa-facebook-f"></i></a>
                         <a href="#" class="social-icon-box"><i class="fa-brands fa-instagram"></i></a>
                         <a href="#" class="social-icon-box"><i class="fa-brands fa-twitter"></i></a>
                     </div>
                 </div>
-                <div class="col-lg-2">
+
+                <!-- Column 2 -->
+                <div class="col-lg-3 col-md-6 mb-4">
                     <h6 class="fw-bold mb-4 text-white">Quick Links</h6>
                     <ul class="list-unstyled footer-links">
                         <li><a asp-controller="Home" asp-action="Index">Home</a></li>
@@ -252,7 +262,9 @@
                         <li><a asp-controller="User" asp-action="ContactUs">Contact Us</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-3">
+
+                <!-- Column 3 -->
+                <div class="col-lg-3 col-md-6 mb-4">
                     <h6 class="fw-bold mb-4 text-white">Why Fresh?</h6>
                     <ul class="list-unstyled footer-links text-white-50">
                         <li><i class="fa-solid fa-check text-orange me-2"></i> 15-Min Delivery</li>
@@ -260,16 +272,10 @@
                         <li><i class="fa-solid fa-check text-orange me-2"></i> Farm-to-Fork</li>
                     </ul>
                 </div>
-                <div class="col-lg-3">
-                    <h6 class="fw-bold mb-4 text-white">Stay Fresh</h6>
-                    <p class="small text-white-50">Subscribe for the latest deals.</p>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control bg-transparent border-secondary text-white small" placeholder="Your Email">
-                        <button class="btn btn-orange btn-sm px-3" type="button">Join</button>
-                    </div>
-                </div>
             </div>
+
             <hr class="border-secondary opacity-25">
+
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
                     <p class="small text-white-50 mb-0">&copy; @DateTime.Now.Year Alwayzzz Fresh. All rights reserved.</p>
@@ -282,6 +288,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </footer>
 
@@ -313,55 +320,9 @@
         }
 
         // LOCATION LOGIC
-        let searchTimeout;
-        function searchPlaces() {
-            const query = document.getElementById('locSearch').value;
-            const resultsBox = document.getElementById('locResultsList');
-            if (query.length < 3) {
-                resultsBox.innerHTML = '<div class="p-5 text-center text-muted">Type at least 3 letters to search...</div>';
-                return;
-            }
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(async () => {
-                resultsBox.innerHTML = '<div class="p-5 text-center"><div class="spinner-border text-success"></div></div>';
-                try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=in&q=${query}`);
-                    const data = await response.json();
-                    if (data.length > 0) {
-                        resultsBox.innerHTML = data.map(loc => {
-                            const displayName = loc.display_name.split(',').slice(0, 3).join(',');
-                            return `<div class="p-3 border-bottom cursor-pointer" onclick="confirmLocation('${loc.name || displayName}')">
-                                <div class="fw-bold text-dark">${loc.name || 'Location'}</div>
-                                <div class="small text-muted text-truncate">${loc.display_name}</div>
-                            </div>`;
-                        }).join('');
-                    } else {
-                        resultsBox.innerHTML = '<div class="p-4 text-center">No location found in India</div>';
-                    }
-                } catch (error) {
-                    resultsBox.innerHTML = '<div class="p-4 text-center text-danger">Search failed.</div>';
-                }
-            }, 500);
-        }
+        
 
-        async function detectLocation() {
-            const display = document.getElementById('displayLocation');
-            const originalText = display.innerText;
-            display.innerText = "Detecting...";
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-                        const data = await res.json();
-                        const city = data.address.city || data.address.town || data.address.village || data.address.state || "India";
-                        confirmLocation(city);
-                    } catch { confirmLocation("India"); }
-                }, () => {
-                    alert("Please enable location permissions");
-                    display.innerText = originalText;
-                });
-            }
-        }
+       
 
         function confirmLocation(name) {
             const cleanName = name.split(',')[0];
@@ -378,6 +339,7 @@
             if (saved) document.getElementById('displayLocation').innerText = saved;
         });
     </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

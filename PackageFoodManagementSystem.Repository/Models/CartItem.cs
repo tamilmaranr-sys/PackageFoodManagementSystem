@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-
-namespace PackageFoodManagementSystem.Repository.Models
+﻿namespace PackageFoodManagementSystem.Repository.Models
 {
-
-    [Table("CartItem")]
     public class CartItem
     {
         public int CartItemId { get; set; }
-
         public int CartId { get; set; }
-        public Cart Cart { get; set; }
-
         public int ProductId { get; set; }
-        public Product Product { get; set; }
-
+        public int BatchID { get; set; } // Ensure this is present
         public int Quantity { get; set; }
 
+        public virtual Cart Cart { get; set; }
+        public virtual Product Product { get; set; }
     }
 }

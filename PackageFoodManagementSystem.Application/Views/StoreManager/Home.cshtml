@@ -1,84 +1,112 @@
 ﻿@model PackageFoodManagementSystem.Repository.Models.HomeModel
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Home";
     Layout = "~/Views/Shared/_StoreManagerlayout.cshtml";
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-@* Unique ID to isolate styles from the sidebar *@
 <div id="managerDashboardContent">
-
-    <div class="dash-header mb-4">
-        <h2 class="fw-bold">Welcome back, <span class="text-primary">Manager</span> 👋</h2>
-        <p class="text-muted">Here is what's happening in your store today.</p>
+    <div class="dash-header mb-5">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Welcome back, <span class="text-primary">Manager</span> 👋</h2>
+                <p class="text-muted mb-0">Here's a quick look at your store's performance today.</p>
+            </div>
+            <div class="date-display px-3 py-2 bg-white shadow-sm rounded-pill">
+                <i class="fa-regular fa-calendar text-primary me-2"></i>
+                <span class="fw-bold text-dark">@DateTime.Now.ToString("dd MMM yyyy")</span>
+            </div>
+        </div>
     </div>
 
-    <div class="stats-row">
-        <div class="info-card">
-            <div class="card-body">
-                <div class="icon-circle bg-light-blue"><i class="fa-solid fa-box"></i></div>
-                <div>
+    <div class="stats-grid mb-5">
+        <div class="info-card stat-card-blue">
+            <div class="card-content">
+                <div class="icon-box"><i class="fa-solid fa-box"></i></div>
+                <div class="text-group">
                     <p class="label">Total Products</p>
-                    <h3 class="number">@ViewBag.TotalProducts</h3>
+                    <h2 class="number">@ViewBag.TotalProducts</h2>
                 </div>
             </div>
         </div>
-        <div class="info-card">
-            <div class="card-body">
-                <div class="icon-circle bg-light-green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
-                <div>
+        <div class="info-card stat-card-green">
+            <div class="card-content">
+                <div class="icon-box"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div class="text-group">
                     <p class="label">Total Sales</p>
-                    <h3 class="number">@ViewBag.TotalSales</h3>
+                    <h2 class="number">@ViewBag.TotalSales</h2>
+                </div>
+            </div>
+        </div>
+        <div class="info-card stat-card-purple">
+            <div class="card-content">
+                <div class="icon-box"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="text-group">
+                    <p class="label">Available Stock</p>
+                    <h2 class="number">@ViewBag.AvailableStock</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-lg-7">
-            <div class="white-section shadow-sm">
-                <h5 class="section-title"><i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> Attention Required</h5>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="white-section h-100 shadow-sm">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="section-icon bg-soft-danger me-3"><i class="fa-solid fa-bell"></i></div>
+                    <h5 class="section-title mb-0">Attention Required</h5>
+                </div>
 
                 <div class="alert-strip strip-danger">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <p><strong>@ViewBag.LowStockCount products</strong> are low in stock. Update inventory soon.</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-circle-exclamation fs-5 me-3"></i>
+                        <div>
+                            <p class="mb-0 fw-bold">Low Stock Alert</p>
+                            <small>@ViewBag.LowStockCount items need restocking.</small>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="alert-strip strip-warning">
-                    <i class="fa-solid fa-clock"></i>
-                    <p><strong>@ViewBag.PendingOrders orders</strong> are waiting for confirmation.</p>
-                </div>
-            </div>
-
-            <div class="white-section shadow-sm mt-4">
-                <h5 class="section-title"><i class="fa-solid fa-rocket text-primary me-2"></i> Quick Actions</h5>
-                <div class="actions-grid">
-                    <a asp-action="Orders" class="action-btn">
-                        <i class="fa-solid fa-receipt"></i>
-                        <span>Orders</span>
-                    </a>
-                    <a asp-action="Inventory" class="action-btn">
-                        <i class="fa-solid fa-boxes-stacked"></i>
-                        <span>Inventory</span>
-                    </a>
-                    <a asp-action="Reports" class="action-btn">
-                        <i class="fa-solid fa-chart-bar"></i>
-                        <span>Reports</span>
-                    </a>
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-clock fs-5 me-3"></i>
+                        <div>
+                            <p class="mb-0 fw-bold">Pending Orders</p>
+                            <small>@ViewBag.PendingOrders orders awaiting confirmation.</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <div class="white-section shadow-sm h-100">
-                <h5 class="section-title"><i class="fa-solid fa-chart-pie me-2"></i> Inventory Summary</h5>
-                <div class="mt-4 text-center">
-                    <div class="stock-circle">
-                        <h2 class="mb-0">@ViewBag.AvailableStock</h2>
-                        <small>Units in Stock</small>
-                    </div>
-                    <p class="mt-3 text-muted">Stock capacity is currently at 78%.</p>
+        <div class="col-md-6">
+            <div class="white-section h-100 shadow-sm">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="section-icon bg-soft-primary me-3"><i class="fa-solid fa-bolt"></i></div>
+                    <h5 class="section-title mb-0">Quick Actions</h5>
+                </div>
+
+                <div class="actions-container">
+                    <a asp-action="Orders" class="action-item">
+                        <div class="action-icon bg-light-blue"><i class="fa-solid fa-receipt"></i></div>
+                        <div class="action-text">
+                            <span class="d-block fw-bold">View Orders</span>
+                            <small class="text-muted">Manage customer purchases</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right ms-auto text-muted"></i>
+                    </a>
+
+                
+
+                    <a asp-action="Reports" class="action-item">
+                        <div class="action-icon bg-light-purple"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="action-text">
+                            <span class="d-block fw-bold">Sales Reports</span>
+                            <small class="text-muted">Analyze store performance</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right ms-auto text-muted"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -86,124 +114,185 @@
 </div>
 
 <style>
-    /* Scoping all styles to the Dashboard container ONLY */
     #managerDashboardContent {
-        padding: 30px;
-        background-color: #f0f2f5;
+        padding: 40px;
+        background-color: #f4f7fe;
         min-height: 100vh;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-        #managerDashboardContent .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 24px;
+        padding: 24px;
+        border: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.02);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+
+    .stat-card-blue .icon-box {
+        background: #eef2ff;
+        color: #4e73df;
+    }
+
+    .stat-card-green .icon-box {
+        background: #e6fffa;
+        color: #1cc88a;
+    }
+
+    .stat-card-purple .icon-box {
+        background: #f5f3ff;
+        color: #8b5cf6;
+    }
+
+    .label {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+
+    .number {
+        font-weight: 800;
+        margin-bottom: 0;
+        color: #1a202c;
+    }
+
+    /* Sections */
+    .white-section {
+        background: white;
+        border-radius: 28px;
+        padding: 32px;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+    }
+
+    .section-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .bg-soft-danger {
+        background: #fff5f5;
+        color: #e53e3e;
+    }
+
+    .bg-soft-primary {
+        background: #ebf8ff;
+        color: #3182ce;
+    }
+
+    .section-title {
+        font-weight: 800;
+        color: #2d3748;
+        letter-spacing: -0.5px;
+    }
+
+    /* Alerts */
+    .alert-strip {
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+        border: 1px solid transparent;
+    }
+
+    .strip-danger {
+        background: #fff5f5;
+        color: #c53030;
+        border-color: #fed7d7;
+    }
+
+    .strip-warning {
+        background: #fffaf0;
+        color: #9c4221;
+        border-color: #feebc8;
+    }
+
+    /* List-style Actions (Modern & Clean) */
+    .actions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-item {
+        display: flex;
+        align-items: center;
+        padding: 14px;
+        background: #f8fafc;
+        border-radius: 18px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+        border: 1px solid #edf2f7;
+    }
+
+        .action-item:hover {
+            background: #fff;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-color: #4e73df;
         }
 
-        #managerDashboardContent .info-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
+    .action-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+        font-size: 18px;
+    }
 
-        #managerDashboardContent .card-body {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+    .bg-light-blue {
+        background: #eef2ff;
+        color: #4e73df;
+    }
 
-        #managerDashboardContent .icon-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
+    .bg-light-green {
+        background: #f0fff4;
+        color: #38a169;
+    }
 
-        #managerDashboardContent .bg-light-blue {
-            background: #eef2ff;
-            color: #4e73df;
-        }
+    .bg-light-purple {
+        background: #faf5ff;
+        color: #805ad5;
+    }
 
-        #managerDashboardContent .bg-light-green {
-            background: #e6fffa;
-            color: #1cc88a;
-        }
+    .action-text span {
+        font-size: 0.95rem;
+        color: #2d3748;
+    }
 
-        #managerDashboardContent .white-section {
-            background: white;
-            border-radius: 25px;
-            padding: 30px;
-        }
-
-        #managerDashboardContent .section-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-
-        /* Attention Strips */
-        #managerDashboardContent .alert-strip {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
-        #managerDashboardContent .strip-danger {
-            background: #fff5f5;
-            color: #c53030;
-            border-left: 5px solid #e74a3b;
-        }
-
-        #managerDashboardContent .strip-warning {
-            background: #fffdf5;
-            color: #975a16;
-            border-left: 5px solid #f6c23e;
-        }
-
-        /* Action Buttons (The Dashboard Grid) */
-        #managerDashboardContent .actions-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        #managerDashboardContent .action-btn {
-            text-decoration: none;
-            background: #f8fafc;
-            padding: 25px 15px;
-            border-radius: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            color: #333;
-            font-weight: 700;
-            transition: 0.3s ease;
-        }
-
-            #managerDashboardContent .action-btn:hover {
-                background: #4e73df;
-                color: white;
-                transform: translateY(-5px);
-            }
-
-        #managerDashboardContent .stock-circle {
-            width: 150px;
-            height: 150px;
-            border: 10px solid #f6c23e;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-        }
+    .action-text small {
+        font-size: 0.8rem;
+    }
 </style>

@@ -1,4 +1,5 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
+@{
     ViewBag.Title = "Sign In";
     Layout = "~/Views/Shared/_Layout1.cshtml";
 }
@@ -25,22 +26,23 @@
                     <i class="fa fa-eye" aria-hidden="true"></i>
                 </button>
             </div>
-            @* <span class="error" id="passwordError"></span> *@
+
+            <div class="validation-summary-errors" data-valmsg-summary="true">
+                @foreach (var modelError in ViewData.ModelState[string.Empty]?.Errors ?? Enumerable.Empty<ModelError>())
+                {
+                    <span class="text-danger">@modelError.ErrorMessage</span>
+                }
+            </div>
             <span class="error"></span>
+
             <!-- Submit -->
             <div><button type="submit" class="btn">Sign In</button></div>
             
         </form>
     </div>
 </section>
-@if (TempData["ErrorMessage"] != null)
-{
-    <script>
-        alert('@TempData["ErrorMessage"]');
-    </script>
-}
 
-@if (TempData["SuccessMessage"] != null)
+@* @if (TempData["SuccessMessage"] != null)
 
 {
     <script>
@@ -49,5 +51,11 @@
     </script>
 
 }
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        alert('@TempData["ErrorMessage"]');
+    </script>
+} *@
 
 

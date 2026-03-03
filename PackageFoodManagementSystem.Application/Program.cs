@@ -11,11 +11,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database Connection
+// 1) Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Session Configuration
+// 2) Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -24,7 +24,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// 3. Authentication Configuration (Cookie + JWT)
+/// Note: Authentication is configured to use both Cookie and JWT schemes.
+
+// 3) Authentication: Cookie + JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -53,38 +55,64 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 4. Dependency Injection (DI) Registrations
+// 4) DI Registrations
 
-// Batches - Fixed "Unable to resolve service" for IBatchService
+// Customer Address
+/// Note: This is used by CustomerController to avoid direct DbContext access from the controller
+builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
+builder.Services.AddScoped<ICustomerAddressService, CustomerAddressService>();
+
+// Batches
+/// Note: This is used by BatchController to avoid direct DbContext access from the controller
 builder.Services.AddScoped<IBatchRepository, BatchRepository>();
 builder.Services.AddScoped<IBatchService, BatchService>();
 
-// User & Customer
-// 4. Dependency Injection (DI) Registrations
+// Categories (NEW: used by BatchController to avoid direct DbContext)
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+// Users & Customers
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+// Orders
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+// Billing
 builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddScoped<IBillingService, BillingService>();
+
+// Payment
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+
+// Wallet
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<IWalletService, WalletService>();
+
+// Products
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICartService, CartService>();
 
-// Cart - Added missing Repository registration to fix CartController crash
-//builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
-builder.Services.AddScoped<ICustomerAddressService, CustomerAddressService>();
+// Cart
+builder.Services.AddScoped<ICartRepository, CartRepository>(); // <-- ensure repo is registered
+builder.Services.AddScoped<ICartService, CartService>();       // (remove duplicates)
+
+// Inventory
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
-    
-// 5. Configure the HTTP request pipeline
+
+// 5) Pipeline
+
+/// Note: Exception handling and HSTS only in production
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -95,12 +123,13 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// ✅ CRITICAL ORDER: Session must come before Authentication
+// Order matters: Session BEFORE AuthN
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ✅ Single no-cache middleware (applies only to authenticated users)
+// No-cache for authenticated users
+/// Note: This is a simple middleware to prevent caching of authenticated pages.
 app.Use(async (context, next) =>
 {
     if (context.User.Identity?.IsAuthenticated == true)
@@ -110,10 +139,12 @@ app.Use(async (context, next) =>
         context.Response.Headers["Expires"] = "0";
     }
 
+
     await next();
 });
 
-// 6. Routing
+// 6) Routing
+/// Note: Default route points to HomeController's Welcome action instead of Index
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Welcome}/{id?}");

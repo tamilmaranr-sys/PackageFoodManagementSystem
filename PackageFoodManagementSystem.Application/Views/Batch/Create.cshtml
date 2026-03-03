@@ -64,29 +64,26 @@
                 var selectedCategory = $(this).val();
                 var $productSelect = $('#ProductDropdown');
 
-                // Clear and disable product dropdown by default
                 $productSelect.empty().append('<option value="">-- Select Product --</option>').prop('disabled', true);
 
                 if (selectedCategory) {
                     $.ajax({
                         url: '@Url.Action("GetProductsByCategory", "Batch")',
                         type: 'GET',
-                        data: { categoryId: selectedCategory },
+                        data: { categoryId: parseInt(selectedCategory) }, // Ensure it's an int
                         success: function (data) {
                             if (data && data.length > 0) {
-                                $productSelect.prop('disabled', false); // Enable it
+                                $productSelect.prop('disabled', false);
                                 $.each(data, function (index, item) {
+                                    // Use 'id' and 'name' to match the Controller's Select block
                                     $productSelect.append($('<option>', {
-                                        value: item.productId,
-                                        text: item.productName
+                                        value: item.id,
+                                        text: item.name
                                     }));
                                 });
                             } else {
-                                alert("No active products found for this category.");
+                                alert("No products found in the database for this category. Check if KitKat's Category matches exactly.");
                             }
-                        },
-                        error: function () {
-                            alert("Error loading products. Please check the CategoryId in your database.");
                         }
                     });
                 }

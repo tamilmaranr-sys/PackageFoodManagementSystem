@@ -1,237 +1,114 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PackageFoodManagementSystem.DTOs;
-using PackageFoodManagementSystem.Repository.Data;
 using PackageFoodManagementSystem.Repository.Models;
+using PackageFoodManagementSystem.Services.Interfaces;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PackageFoodManagementSystem.Application.Controllers
 {
-
     [Authorize(Roles = "StoreManager")]
     public class StoreManagerController : Controller
     {
-        //    [HttpPost]
-        //    public async Task<IActionResult> Create(Product product)
-        //    {
-        //        if (ModelState.IsValid)
-        //        {
-        //            _context.Add(product);
-        //            await _context.SaveChangesAsync();
-        //            return RedirectToAction("Index");
-        //        }
-        //        return View(product);
-        //    }
+        private readonly IProductService _productService;
+        private readonly IOrderService _orderService;
 
-        private readonly ApplicationDbContext _context;
-
-
-        public StoreManagerController(ApplicationDbContext context)
+        public StoreManagerController(IProductService productService, IOrderService orderService)
         {
-            _context = context;
+            _productService = productService;
+            _orderService = orderService;
         }
 
-        //public IActionResult Home()
-        //{
-        //    return View();
-        //}
-
-        public IActionResult Home()
+        public async Task<IActionResult> Home()
         {
-            // 1. Fetch real data using the singular table names from your Context
-            var totalProducts = _context.Products.Count();
-            var availableStock = _context.Products.Sum(p => p.Quantity);
-            var today = DateTime.Today;
+            // Products & stock
+            var products = (await _productService.GetAllProductsAsync())?.ToList() ?? new System.Collections.Generic.List<Product>();
+            ViewBag.TotalProducts = products.Count;
+            ViewBag.AvailableStock = products.Sum(p => p.Quantity);
 
-            // Today's Orders
-            var todayOrdersCount = _context.Orders.Count(o => o.OrderDate >= today);
+            // Orders today
+            ViewBag.TodayOrders = await _orderService.CountTodayOrdersAsync();
 
-            // Total Sales (Sum of FinalAmount from Bill table)
-            var totalSales = _context.Bill.Sum(b => (decimal?)b.FinalAmount) ?? 0;
+            // Total sales (using order totals to avoid DbContext in controller)
+            var totalSales = await _orderService.SumTotalRevenueAsync();
+            ViewBag.TotalSales = totalSales.ToString("C");
 
-            // Pending Orders (Status based on your OrderService logic)
-            var pendingOrders = _context.Orders.Count(o => o.OrderStatus == "Placed" || o.OrderStatus == "Pending");
+            // Pending: match your earlier "Placed OR Pending"
+            var allOrders = await _orderService.GetOrdersAsync(null);
+            ViewBag.PendingOrders = allOrders.Count(o => o.OrderStatus == "Placed" || o.OrderStatus == "Pending");
 
-            // Low Stock (Items with quantity less than 5)
-            var lowStockCount = _context.Products.Count(p => p.Quantity < 5);
-
-            // Pass data to ViewBag
-            ViewBag.TotalProducts = totalProducts;
-            ViewBag.AvailableStock = availableStock;
-            ViewBag.TodayOrders = todayOrdersCount;
-            ViewBag.TotalSales = totalSales.ToString("C"); // Currency format
-            ViewBag.PendingOrders = pendingOrders;
-            ViewBag.LowStockCount = lowStockCount;
+            // Low stock threshold < 5
+            ViewBag.LowStockCount = products.Count(p => p.Quantity < 5);
 
             return View();
         }
 
-        public IActionResult Profile()
+        public IActionResult Profile() => View();
+
+        public IActionResult AddProduct() => View();
+
+        public async Task<IActionResult> OrdersDashboard()
         {
+            ViewBag.TodayOrders = await _orderService.CountTodayOrdersAsync();
+            var allOrders = await _orderService.GetOrdersAsync(null);
+            ViewBag.PendingOrders = allOrders.Count(o => o.OrderStatus == "Pending" || o.OrderStatus == "Placed");
+            ViewBag.CompletedOrders = await _orderService.CountCompletedOrdersAsync();
+            ViewBag.CancelledOrders = await _orderService.CountCancelledOrdersAsync();
             return View();
         }
 
-
-        public IActionResult AddProduct()
+        public async Task<IActionResult> Orders(string status)
         {
-            return View();
+            var orders = await _orderService.GetOrdersAsync(status);
+            return View(orders);
         }
 
-        public IActionResult OrdersDashboard()
-        {
-            var today = DateTime.Today;
+        public IActionResult Inventory() => View();
 
-            ViewBag.TodayOrders = _context.Orders
-                .Count(o => o.OrderDate >= today);
+        public IActionResult Compliance() => View();
 
-            ViewBag.PendingOrders = _context.Orders
-                .Count(o => o.OrderStatus == "Pending" || o.OrderStatus == "Placed");
-
-            ViewBag.CompletedOrders = _context.Orders
-                .Count(o => o.OrderStatus == "Confirmed" || o.OrderStatus == "Delivered");
-
-            ViewBag.CancelledOrders = _context.Orders
-                .Count(o => o.OrderStatus == "Cancelled");
-
-            return View();
-        }
-
-        public IActionResult Orders(string status)
-
-        {
-
-            var orders = _context.Orders
-
-                .Include(o => o.Customer)   // or Customer
-
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(status))
-
-            {
-
-                if (status == "Today")
-
-                {
-
-                    var today = DateTime.Today;
-
-                    orders = orders.Where(o => o.OrderDate >= today);
-
-                }
-
-                else if (status == "Completed")
-
-                {
-
-                    orders = orders.Where(o =>
-
-                        o.OrderStatus == "Confirmed" || o.OrderStatus == "Delivered");
-
-                }
-
-                else
-
-                {
-
-                    orders = orders.Where(o => o.OrderStatus == status);
-
-                }
-
-            }
-
-            return View(orders.ToList());
-
-        }
-
-        public IActionResult Inventory()
-        {
-            return View();
-        }
-        public IActionResult Reports()
-        {
-            var thirtyDaysAgo = DateTime.Now.AddDays(-30);
-
-            // Use 'StoreReportDto' instead of 'StoreReportViewModel'
-            var reportData = new StoreReportDto
-            {
-                TotalRevenue = _context.Orders
-                    .Where(o => o.OrderDate >= thirtyDaysAgo && o.OrderStatus != "Cancelled")
-                    .Sum(o => o.TotalAmount),
-
-                TotalOrders = _context.Orders
-                    .Count(o => o.OrderDate >= thirtyDaysAgo),
-
-                TopProducts = _context.OrderItems
-                    .Include(oi => oi.Product)
-                    .GroupBy(oi => oi.Product.ProductName) // Verified 'Name' from your SQL screenshot
-                    .Select(g => new TopProductDto
-                    {
-                        ProductName = g.Key,
-                        QuantitySold = g.Sum(x => x.Quantity),
-                        Revenue = g.Sum(x => x.Subtotal)
-                    })
-                    .OrderByDescending(x => x.QuantitySold)
-                    .Take(5)
-                    .ToList()
-            };
-
-            return View(reportData);
-        }
-        public IActionResult Compliance()
-        {
-            return View();
-        }
         public IActionResult Settings()
         {
-            return View();
+            var firstProduct = _productService.GetAllProducts().FirstOrDefault();
+            var model = firstProduct ?? new Product { ProductName = "Default Store", Category = "General" };
+            return View(model);
         }
 
         [HttpGet]
+        public IActionResult EditProfile(int id) => View();
 
-        public async Task<IActionResult> EditProfile(int id)
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditProfile(string UserEmail, string UserPhone)
         {
-
-            // Fetch the specific record from the database
-
-            var data = await _context.Products.FindAsync(id);
-
-            if (data == null) return NotFound();
-
-            return View(data);
-
+            if (!string.IsNullOrEmpty(UserEmail) && !string.IsNullOrEmpty(UserPhone))
+            {
+                HttpContext.Session.SetString("UserEmail", UserEmail);
+                HttpContext.Session.SetString("UserPhone", UserPhone);
+                return RedirectToAction("Settings");
+            }
+            return View();
         }
 
         [HttpPost]
-
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Edit(Product product)
-
+        public IActionResult Edit(Product product)
         {
-
             if (ModelState.IsValid)
-
             {
-
-                // _context is now available for the update operation
-
-                _context.Update(product);
-
-                await _context.SaveChangesAsync();
-
-                // Redirect back to the Settings dashboard
-
+                _productService.UpdateProduct(product);
                 return RedirectToAction("Settings");
-
             }
-
-            // If validation fails, stay on the edit page
-
             return View("EditProfile", product);
-
         }
 
+        public IActionResult Reports()
+        {
+            // Build last 30 days report through IOrderService (no DbContext here)
+            var reportData = _orderService.BuildStoreReport(30);
+            return View(reportData);
+        }
     }
 }

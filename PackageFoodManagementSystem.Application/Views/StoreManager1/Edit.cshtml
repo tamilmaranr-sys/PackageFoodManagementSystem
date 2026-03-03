@@ -1,0 +1,43 @@
+﻿@model PackageFoodManagementSystem.Repository.Models.Product
+ 
+<div class="container">
+<div class="form-container" style="max-width: 600px; margin: 50px auto; padding: 30px; background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+<input type="hidden" asp-for="ProductId" />
+ 
+            <div class="mb-3 text-center">
+<img src="@Model.ImageData" class="rounded shadow-sm mb-2" style="width: 120px; height: 120px; object-fit: cover;" />
+<input type="file" name="imageFile" class="form-control" />
+</div>
+ 
+            <div class="mb-3">
+<label class="fw-bold">Product Name</label>
+<input asp-for="ProductName" class="form-control" required />
+</div>
+ 
+            <div class="mb-3">
+<label class="fw-bold">Category</label>
+<input asp-for="Category" class="form-control" required />
+</div>
+ 
+            <div class="row">
+<div class="col-md-6 mb-3">
+<label class="fw-bold">Price (₹)</label>
+<input asp-for="Price" type="number" step="0.01" class="form-control" required />
+</div>
+</div>
+ 
+            @* Added IsActive Checkbox *@
+<div class="mb-3 form-check form-switch">
+<input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveCheck">
+<label class="form-check-label fw-bold" for="isActiveCheck">Available for Sale (IsActive)</label>
+</div>
+ 
+            <div class="d-grid gap-2">
+<button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #d122e3 0%, #8b129a 100%); border:none;">Update All Columns</button>
+<a asp-action="Index" class="btn btn-light">Cancel</a>
+</div>
+</form>
+</div>
+</div>
+ 

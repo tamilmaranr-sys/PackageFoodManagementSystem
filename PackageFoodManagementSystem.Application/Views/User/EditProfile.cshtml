@@ -25,17 +25,25 @@
                             <div class="input-group shadow-sm rounded">
                                 <span class="input-group-text bg-white border-end-0"><i class="fa-regular fa-user text-success"></i></span>
                                 @* 2. Added name="Name" *@
-                                <input type="text" name="Name" class="form-control border-start-0 fw-semibold" value="@Model.Name">
+                                <input type="text" name="Name" class="form-control border-start-0 fw-semibold" value="@Model.Name" id="inputName">
                             </div>
+                            <small id="nameError" class="text-danger d-none">Enter a valid name.</small>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted">PHONE NUMBER</label>
                             <div class="input-group shadow-sm rounded">
                                 <span class="input-group-text bg-white border-end-0 text-muted">+91</span>
-                                @* 3. Added name="MobileNumber" *@
-                                <input type="text" name="MobileNumber" class="form-control border-start-0 fw-semibold" value="@Model.MobileNumber">
+                                @* 3. Added name="MobileNumber" with validation hooks *@
+                                <input type="text"
+                                       name="MobileNumber"
+                                       class="form-control border-start-0 fw-semibold"
+                                       value="@Model.MobileNumber"
+                                       id="inputPhone"
+                                       inputmode="numeric"
+                                       autocomplete="tel" />
                             </div>
+                            <small id="phoneError" class="text-danger d-none">Enter a valid 10-digit mobile number.</small>
                         </div>
 
                         <div class="col-12">
@@ -43,7 +51,7 @@
                             <div class="input-group shadow-sm rounded">
                                 <span class="input-group-text bg-white border-end-0"><i class="fa-regular fa-envelope text-success"></i></span>
                                 @* 4. Added name="Email" *@
-                                <input type="email" name="Email" class="form-control border-start-0 fw-semibold" value="@Model.Email" readonly>
+                                <input type="email" name="Email" class="form-control border-start-0 fw-semibold" value="@Model.Email" id="inputEmail" readonly>
                             </div>
                         </div>
                     </div>
@@ -60,31 +68,106 @@
     </div>
 </div>
 
-@* Add AJAX Script to handle the database update *@
+@* Dependencies *@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    $(document).ready(function () {
-        $("#btnUpdate").click(function () {
-            var formData = $("#profileForm").serialize(); // Collects all 'name' attributes
+    // ---- Inline validation helpers ----
+    (function () {
+        const nameInput  = document.getElementById('inputName');
+        const nameError  = document.getElementById('nameError');
+        const phoneInput = document.getElementById('inputPhone');
+        const phoneError = document.getElementById('phoneError');
+        const updateBtn  = document.getElementById('btnUpdate');
 
-            $.ajax({
-                url: '/User/UpdateProfile',
-                type: 'POST',
-                data: formData,
-                success: function (response) {
-                    if (response.success) {
-                        Swal.fire('Success', 'Profile updated successfully!', 'success')
-                            .then(() => location.reload());
+        // Regex: strict 10 digits (Indian mobile)
+        const tenDigitRegex = /^[0-9]{10}$/;
+
+        function setError(el, show, msgDefault) {
+            if (!el) return;
+            el.textContent = el.textContent || msgDefault || 'Invalid value.';
+            el.classList.toggle('d-none', !show);
+        }
+
+        function sanitizeDigits(value) {
+            return (value || '').replace(/\D+/g, '');
+        }
+
+        function validatePhone() {
+            const raw = phoneInput.value.trim();
+            const digits = sanitizeDigits(raw);
+
+            // sanitize in place (keep only digits)
+            if (digits !== raw) {
+                phoneInput.value = digits;
+            }
+
+            const ok = tenDigitRegex.test(digits);
+            setError(phoneError, !ok, 'Enter a valid 10-digit mobile number.');
+            return ok;
+        }
+
+        function validateName() {
+            const val = (nameInput.value || '').trim();
+            const ok = val.length >= 2;
+            setError(nameError, !ok, 'Enter a valid name.');
+            return ok;
+        }
+
+        if (phoneInput) {
+            phoneInput.addEventListener('input', validatePhone);
+            phoneInput.addEventListener('blur', validatePhone);
+            // sanitize + validate after paste
+            phoneInput.addEventListener('paste', () => setTimeout(validatePhone, 0));
+        }
+
+        if (nameInput) {
+            nameInput.addEventListener('input', validateName);
+            nameInput.addEventListener('blur', validateName);
+        }
+
+        // Guarded submit
+        if (updateBtn) {
+            updateBtn.addEventListener('click', function () {
+                const phoneOk = validatePhone();
+                const nameOk  = validateName();
+
+                if (!nameOk || !phoneOk) {
+                    if (window.Swal) {
+                        let msg = !nameOk && !phoneOk
+                            ? 'Please enter a valid name and a 10-digit phone number.'
+                            : (!nameOk ? 'Please enter a valid name.' : 'Please enter a valid 10-digit phone number.');
+                        Swal.fire('Validation Error', msg, 'warning');
                     } else {
-                        Swal.fire('Error', response.message, 'error');
+                        alert('Please fix the highlighted fields.');
                     }
-                },
-                error: function () {
-                    Swal.fire('Error', 'Something went wrong on the server', 'error');
+                    return; // Block AJAX
                 }
+
+                // proceed with AJAX submit
+                const formData = $("#profileForm").serialize();
+
+                $.ajax({
+                    url: '/User/UpdateProfile',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        if (response && response.success) {
+                            Swal.fire('Success', 'Profile updated successfully!', 'success')
+                                .then(() => location.reload());
+                        } else {
+                            const message = (response && response.message) || 'Failed to update profile.';
+                            Swal.fire('Error', message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Something went wrong on the server', 'error');
+                    }
+                });
             });
-        });
-    });
+        }
+    })();
 </script>

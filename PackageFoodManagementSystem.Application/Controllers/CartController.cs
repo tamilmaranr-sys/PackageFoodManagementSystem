@@ -1,43 +1,39 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PackageFoodManagementSystem.Application.DTOs;
-using PackageFoodManagementSystem.Repository.Data;
 using PackageFoodManagementSystem.Repository.Models;
 using PackageFoodManagementSystem.Services.Interfaces;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 [Authorize]
 [Route("Cart")]
 public class CartController : Controller
 {
-    private readonly ApplicationDbContext _context;
     private readonly ICartService _cartService;
 
-    public CartController(ApplicationDbContext context, ICartService cartService)
+    public CartController(ICartService cartService)
     {
-        _context = context;
         _cartService = cartService;
     }
 
     // ================== CART PAGE ==================
     [HttpGet("MyBasket")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-    public IActionResult MyBasket()
+    public async Task<IActionResult> MyBasket()
     {
-        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        var cart = _context.Carts
-          .Include(c => c.CartItems)
-          .ThenInclude(ci => ci.Product)
-          .FirstOrDefault(c => c.UserAuthenticationId == userId && c.IsActive);
+        var cart = await _cartService.GetActiveCartAsync(userId);
 
+        // Safety: if null (shouldn't be, service creates it), construct empty shell
         if (cart == null)
         {
             cart = new Cart
             {
                 UserAuthenticationId = userId,
-                CartItems = new List<CartItem>()
+                CartItems = new System.Collections.Generic.List<CartItem>()
             };
         }
 
@@ -45,18 +41,15 @@ public class CartController : Controller
     }
 
     [HttpPost("Add")]
-    public IActionResult Add([FromQuery] int productId)
+    public async Task<IActionResult> Add([FromQuery] int productId)
     {
-        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        // 1. Perform the update via service
+        // 1) Update via service
         _cartService.AddItem(userId, productId);
 
-        // 2. Fetch updated data for JSON response
-        var cart = _context.Carts
-            .Include(c => c.CartItems)
-            .FirstOrDefault(c => c.UserAuthenticationId == userId && c.IsActive);
-
+        // 2) Fetch updated data for JSON response via service
+        var cart = await _cartService.GetActiveCartAsync(userId);
         var item = cart?.CartItems.FirstOrDefault(x => x.ProductId == productId);
         var totalCount = cart?.CartItems.Sum(ci => ci.Quantity) ?? 0;
 
@@ -69,18 +62,15 @@ public class CartController : Controller
     }
 
     [HttpPost("Decrease")]
-    public IActionResult Decrease([FromQuery] int productId)
+    public async Task<IActionResult> Decrease([FromQuery] int productId)
     {
-        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        // 1. Perform the update via service
+        // 1) Update via service
         _cartService.DecreaseItem(userId, productId);
 
-        // 2. Fetch updated data for JSON response
-        var cart = _context.Carts
-            .Include(c => c.CartItems)
-            .FirstOrDefault(c => c.UserAuthenticationId == userId && c.IsActive);
-
+        // 2) Fetch updated data for JSON response via service
+        var cart = await _cartService.GetActiveCartAsync(userId);
         var item = cart?.CartItems.FirstOrDefault(x => x.ProductId == productId);
         var totalCount = cart?.CartItems.Sum(ci => ci.Quantity) ?? 0;
 
@@ -93,14 +83,11 @@ public class CartController : Controller
     }
 
     [HttpGet("GetItemQty")]
-    public IActionResult GetItemQty(int productId)
+    public async Task<IActionResult> GetItemQty(int productId)
     {
-        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        var cart = _context.Carts
-          .Include(c => c.CartItems)
-          .FirstOrDefault(c => c.UserAuthenticationId == userId && c.IsActive);
-
+        var cart = await _cartService.GetActiveCartAsync(userId);
         if (cart == null) return Json(0);
 
         var item = cart.CartItems.FirstOrDefault(x => x.ProductId == productId);
@@ -110,191 +97,22 @@ public class CartController : Controller
     [HttpPost("Remove")]
     public IActionResult Remove([FromBody] CartRequest request)
     {
-        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         _cartService.Remove(userId, request.ProductId);
         return Ok();
     }
 
     [HttpGet("GetTotalItems")]
-    public IActionResult GetTotalItems()
+    public async Task<IActionResult> GetTotalItems()
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (claim == null) return Json(0);
 
         int userId = int.Parse(claim.Value);
 
-        var totalCount = _context.CartItems
-            .Where(ci => ci.Cart.UserAuthenticationId == userId && ci.Cart.IsActive)
-            .Sum(ci => ci.Quantity);
+        var cart = await _cartService.GetActiveCartAsync(userId);
+        var totalCount = cart?.CartItems.Sum(ci => ci.Quantity) ?? 0;
 
         return Json(totalCount);
     }
 }
-
-
-
-//using Microsoft.AspNetCore.Authorization;
-
-//using Microsoft.AspNetCore.Mvc;
-
-//using Microsoft.EntityFrameworkCore;
-
-//using PackageFoodManagementSystem.Application.DTOs;
-
-//using PackageFoodManagementSystem.Repository.Data;
-
-//using PackageFoodManagementSystem.Repository.Models;
-
-//using PackageFoodManagementSystem.Services.Interfaces;
-
-//using System.Security.Claims;
-
-//[Authorize]
-
-//[Route("Cart")]
-
-//public class CartController : Controller
-
-//{
-
-//    private readonly ApplicationDbContext _context;
-
-//    private readonly ICartService _cartService;
-
-//    public CartController(ApplicationDbContext context, ICartService cartService)
-
-//    {
-
-//        _context = context;
-
-//        _cartService = cartService;
-
-//    }
-
-//    // ================== CART PAGE ==================
-
-//    [HttpGet("MyBasket")]
-
-//    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-
-//    public IActionResult MyBasket()
-
-//    {
-
-//        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-//        var cart = _context.Carts
-
-//          .Include(c => c.CartItems)
-
-//          .ThenInclude(ci => ci.Product)
-
-//          .FirstOrDefault(c => c.UserAuthenticationId == userId && c.IsActive);
-
-//        if (cart == null)
-
-//        {
-
-//            cart = new Cart
-
-//            {
-
-//                UserAuthenticationId = userId,
-
-//                CartItems = new List<CartItem>()
-
-//            };
-
-//        }
-
-//        return View("MyBasket", cart);
-
-//    }
-
-//    [HttpPost("Add")]
-
-//    public IActionResult Add([FromQuery] int productId) // Added [FromQuery]
-
-//    {
-
-//        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-//        _cartService.AddItem(userId, productId);
-
-//        return Ok();
-
-//    }
-
-//    [HttpPost("Decrease")]
-
-//    public IActionResult Decrease([FromQuery] int productId) // Added [FromQuery]
-
-//    {
-
-//        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-//        _cartService.DecreaseItem(userId, productId);
-
-//        return Ok();
-
-//    }
-
-//    [HttpGet("GetItemQty")]
-
-//    public IActionResult GetItemQty(int productId)
-
-//    {
-
-//        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-//        var cart = _context.Carts
-
-//          .Include(c => c.CartItems)
-
-//          .FirstOrDefault(c => c.UserAuthenticationId == userId && c.IsActive);
-
-//        if (cart == null) return Json(0);
-
-//        var item = cart.CartItems.FirstOrDefault(x => x.ProductId == productId);
-
-//        return Json(item?.Quantity ?? 0);
-
-//    }
-
-//    [HttpPost("Remove")]
-
-//    public IActionResult Remove([FromBody] CartRequest request)
-
-//    {
-
-//        int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-//        _cartService.Remove(userId, request.ProductId);
-
-//        return Ok();
-
-//    }
-
-//    [HttpGet("GetTotalItems")]
-
-//    public IActionResult GetTotalItems()
-
-//    {
-
-//        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-
-//        if (claim == null) return Json(0);
-
-//        int userId = int.Parse(claim.Value);
-
-//        var totalCount = _context.CartItems
-
-//            .Where(ci => ci.Cart.UserAuthenticationId == userId && ci.Cart.IsActive)
-
-//            .Sum(ci => ci.Quantity);
-
-//        return Json(totalCount);
-
-//    }
-
-//}

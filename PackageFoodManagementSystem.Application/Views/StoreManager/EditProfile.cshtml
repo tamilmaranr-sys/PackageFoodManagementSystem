@@ -1,12 +1,19 @@
 ﻿@using Microsoft.AspNetCore.Http
+
 @{
+
     Layout = "~/Views/Shared/_StoreManagerlayout.cshtml";
+
     var userName = Context.Session.GetString("UserName") ?? "Store Manager";
+
     var userEmail = Context.Session.GetString("UserEmail") ?? "manager@store.com";
+
     var userPhone = Context.Session.GetString("UserPhone") ?? "1234567890";
+
 }
 
 <style>
+
     .profile-page-wrapper {
         display: flex;
         justify-content: center;
@@ -18,14 +25,13 @@
     .glass-card {
         background: #fff;
         border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         width: 100%;
         max-width: 500px;
         overflow: hidden;
     }
 
     .profile-header {
-        /* Matches the Coral gradient in your reference */
         background: linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%);
         color: white;
         padding: 40px 20px;
@@ -80,7 +86,13 @@
         border-radius: 12px;
         font-weight: bold;
         cursor: pointer;
+        transition: 0.3s;
     }
+
+        .save-profile-btn:hover {
+            background: #e66e50;
+            transform: translateY(-2px);
+        }
 </style>
 
 <div class="profile-page-wrapper">
@@ -92,17 +104,18 @@
         </div>
 
         <div class="profile-body">
-            @* FIX: Added action and method *@
             <form asp-action="EditProfile" asp-controller="StoreManager" method="post">
-               
+
+                @Html.AntiForgeryToken()
+
                 <div class="edit-input-group">
                     <label>Email Address</label>
-                    <input asp-for="@userEmail" class="edit-field" type="email" />
+                    <input name="UserEmail" value="@userEmail" class="edit-field" type="email" required />
                 </div>
 
                 <div class="edit-input-group">
                     <label>Phone Number</label>
-                    <input asp-for="@userPhone" class="edit-field" />
+                    <input name="UserPhone" value="@userPhone" class="edit-field" type="text" required />
                 </div>
 
                 <div class="edit-input-group" style="opacity: 0.5;">

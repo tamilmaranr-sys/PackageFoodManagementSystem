@@ -34,26 +34,48 @@ namespace PackageFoodManagementSystem.Repository.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Mapping C# Models to Singular SQL Table Names
-            // Map to the exact table name to avoid 'Invalid Object Name' errors
+            // Singular Table Mappings
             modelBuilder.Entity<Batch>().ToTable("Batch");
-            modelBuilder.Entity<Customer>().ToTable("Customer");
-            modelBuilder.Entity<Cart>().ToTable("Cart");
-            modelBuilder.Entity<CartItem>().ToTable("CartItem");
+            modelBuilder.Entity<Bill>().ToTable("Bill");
+            modelBuilder.Entity<Payment>().ToTable("Payment");
+            modelBuilder.Entity<OrderItem>().ToTable("OrderItem");
 
-            // Explicitly mapping Category to ensure the schema matches your SQL table
-            modelBuilder.Entity<Category>().HasKey(c => c.CategoryId);
+            // Plural Table Mappings
+            modelBuilder.Entity<Customer>().ToTable("Customers");
             modelBuilder.Entity<Category>().ToTable("Categories");
+            modelBuilder.Entity<Cart>().ToTable("Carts");
+            modelBuilder.Entity<CartItem>().ToTable("CartItems");
 
-            // Setting Decimal Precision for Price
+            // Decimal Precision
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
+            // 1. Payment -> Order (Break the direct path)
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Order)
+                .WithMany()
+                .HasForeignKey(p => p.OrderID)
+                .OnDelete(DeleteBehavior.NoAction);
 
+            // 2. Payment -> Bill (Break the indirect path through Bill)
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Bill)
+                .WithMany()
+                .HasForeignKey(p => p.BillID) // Matches BillID in your Payment model
+                .OnDelete(DeleteBehavior.NoAction);
 
-            // Optional: If 'UserAuthentications' also gives an error, 
-            // you can force its name here too:
-            // modelBuilder.Entity<UserAuthentication>().ToTable("UserAuthentications");
+            // 3. OrderItem -> Order (Keep this as well to prevent similar issues)
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderID)
+                .OnDelete(DeleteBehavior.NoAction);
+            // 4. Inventory -> Product (Resolves the cycle/multiple cascade paths error)
+            modelBuilder.Entity<Inventory>()
+                .HasOne(i => i.Product)
+                .WithMany() // or .WithMany(p => p.Inventories) if you have that collection
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

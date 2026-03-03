@@ -1,45 +1,61 @@
 ﻿@model PackageFoodManagementSystem.Repository.Models.Batch
 
 @{
+
     ViewData["Title"] = "Edit Batch";
+
     Layout = "_StoreManagerLayout";
+
 }
-
+ 
 <div class="container d-flex justify-content-center mt-5">
-    <div class="card shadow" style="width: 100%; max-width: 450px; border-radius: 15px;">
-        <div class="card-body p-4">
-            <h2 class="text-center fw-bold">Edit Batch</h2>
-            <form asp-action="Edit" method="post">
+<div class="card shadow" style="width: 100%; max-width: 450px; border-radius: 15px;">
+<div class="card-body p-4">
+<h2 class="text-center fw-bold mb-4">Edit Batch</h2>
+<form asp-action="Edit" method="post">
+
                 @Html.AntiForgeryToken()
+ 
                 <input type="hidden" asp-for="BatchId" />
-
+<input type="hidden" asp-for="CategoryId" />
+ 
                 <div class="mb-3">
-                    <label asp-for="ProductId" class="form-label fw-bold">Product</label>
-                    <select asp-for="ProductId" class="form-select" asp-items="ViewBag.Products"></select>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="ManufactureDate" class="form-label fw-bold">Manufacture Date</label>
-                    <input asp-for="ManufactureDate" type="date" class="form-control" />
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="ExpiryDate" class="form-label fw-bold">Expiry Date</label>
-                    <input asp-for="ExpiryDate" type="date" class="form-control" />
-                </div>
-
-                <div class="mb-4">
-                    <label asp-for="Quantity" class="form-label fw-bold">Quantity</label>
-                    <input asp-for="Quantity" type="number" class="form-control" />
-                </div>
-
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary fw-bold" style="background-color: #007bff; border: none;">
-                        Save Changes
-                    </button>
-                    <a asp-action="Index" class="btn btn-link text-decoration-none text-muted text-center">Cancel</a>
-                </div>
-            </form>
-        </div>
-    </div>
+<label class="form-label fw-bold">Category</label>
+<select asp-for="CategoryId" class="form-select bg-light" asp-items="ViewBag.Categories" disabled></select>
+<small class="text-muted">Category cannot be changed after creation.</small>
 </div>
+ 
+                <div class="mb-3">
+<label asp-for="ProductId" class="form-label fw-bold">Product</label>
+<select asp-for="ProductId" class="form-select" asp-items="ViewBag.Products"></select>
+</div>
+ 
+                <div class="row">
+<div class="col-md-6 mb-3">
+<label asp-for="ManufactureDate" class="form-label fw-bold">Mfg Date</label>
+<input asp-for="ManufactureDate" type="date" class="form-control" />
+</div>
+<div class="col-md-6 mb-3">
+<label asp-for="ExpiryDate" class="form-label fw-bold">Expiry Date</label>
+<input asp-for="ExpiryDate" type="date" class="form-control" />
+</div>
+</div>
+ 
+                <div class="mb-4">
+<label asp-for="Quantity" class="form-label fw-bold">Quantity</label>
+<input asp-for="Quantity" type="number" class="form-control" placeholder="Enter batch quantity" />
+<span asp-validation-for="Quantity" class="text-danger small"></span>
+</div>
+ 
+                <div class="d-grid gap-2">
+<button type="submit" class="btn btn-primary fw-bold py-2" style="border-radius: 10px;">
+
+                        Update Batch Details
+</button>
+<a asp-action="Index" class="btn btn-link text-muted">Back to List</a>
+</div>
+</form>
+</div>
+</div>
+</div>
+ 

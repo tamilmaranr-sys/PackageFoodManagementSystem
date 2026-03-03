@@ -5,8 +5,14 @@ namespace PackageFoodManagementSystem.Services.Helpers
 {
     public static class PasswordHelper
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public static string HashPassword(string password)
         {
+            
             // Generate a random salt
             byte[] salt = new byte[16];
             using (var rng = RandomNumberGenerator.Create())

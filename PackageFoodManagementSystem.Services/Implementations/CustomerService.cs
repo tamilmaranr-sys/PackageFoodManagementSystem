@@ -17,5 +17,12 @@ namespace PackageFoodManagementSystem.Services.Implementations
         public Task AddAsync(Customer customer) => _repository.AddAsync(customer);
         public Task UpdateAsync(Customer customer) => _repository.UpdateAsync(customer);
         public Task DeleteAsync(int id) => _repository.DeleteAsync(id);
+
+        public async Task<Customer?> GetByUserIdAsync(int userId)
+        {
+            // If your repo doesn’t have this method yet, filter in memory
+            var all = await _repository.GetAllAsync();
+            return all.FirstOrDefault(c => c.UserId == userId);
+        }
     }
 }

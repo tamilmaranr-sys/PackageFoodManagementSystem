@@ -1,87 +1,144 @@
 ﻿@{
-    ViewData["Title"] = "Admin Dashboard";
+
+    ViewData["Title"] = "Admin Insights";
+
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
+<div class="container-fluid py-4">
+    <h2 class="mb-4 font-weight-bold">Dashboard Overview</h2>
 
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head ">
-                    <div class="card-title ">TOTAL CUSTOMERS</div>
-                </div>                <div class="card-value">@ViewBag.TotalCustomers</div>
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 bg-gradient-primary text-white" style="background: linear-gradient(45deg, #4e73df, #224abe);">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold">₹@ViewBag.TotalRevenue?.ToString("N2")</div>
+                        </div>
+                        @* <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2 bg-gradient-success text-white" style="background: linear-gradient(45deg, #1cc88a, #13855c);">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Total Orders</div>
+                            <div class="h5 mb-0 font-weight-bold">@ViewBag.TotalOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2 bg-gradient-warning text-white" style="background: linear-gradient(45deg, #f6c23e, #dda20a);">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Low Stock Items</div>
+                            <div class="h5 mb-0 font-weight-bold">@ViewBag.LowStockCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2 bg-gradient-info text-white" style="background: linear-gradient(45deg, #36b9cc, #258391);">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Active Batches</div>
+                            <div class="h5 mb-0 font-weight-bold">@ViewBag.TotalBatches</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head">
-                    <div class="card-title">STORE MANAGERS</div>
-                </div>
-                <div class="card-value">@ViewBag.TotalStoreManagers</div>
 
+    <div class="row mt-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                    <a href="@Url.Action("OrdersDashboard", "Home")" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var order in ViewBag.RecentOrders)
+
+                                {
+                                    <tr>
+                                        <td>#@order.OrderID</td>
+                                        <td>@(order.Customer?.Name ?? "Guest")</td>
+                                        <td>@order.OrderDate?.ToShortDateString()</td>
+                                        <td>₹@order.TotalAmount</td>
+                                        <td>
+                                            <span class="badge badge-@(order.OrderStatus == "Delivered" ? "success" : "warning")">
+
+                                                @order.OrderStatus
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">User Statistics</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="p-3 mb-2 bg-light rounded">
+                        <h4 class="mb-0">@ViewBag.TotalCustomers</h4>
+                        <small class="text-muted">Total Customers</small>
+                    </div>
+                    <div class="p-3 bg-light rounded">
+                        <h4 class="mb-0">@ViewBag.TotalStoreManagers</h4>
+                        <small class="text-muted">Store Managers</small>
+                    </div>
+                    <hr />
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head">
-                    <div class="card-title">ORDERS</div>
-                </div>
-                <div class="card-value">0</div>
-
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 pt-5">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head">
-                    <div class="card-title">ACTIVE STORES</div>
-                </div>
-                <div class="card-value">0</div>
-
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 pt-5">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head">
-                    <div class="card-title">INACTIVE STORES</div>
-                </div>
-                <div class="card-value">1</div>
-
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 pt-5">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head">
-                    <div class="card-title">BATCHES</div>
-                </div>
-                <div class="card-value">0</div>
-
-            </div>
-        </div>
-    </div>
-    @* <div class="col-md-4 pt-5">
-        <div class="card card-summary text-center">
-            <div class="card-body">
-                <div class="card-head">
-                    <div class="card-title">BATCHES</div>
-                </div>
-                <div class="card-value">0</div>
-
-            </div>
-        </div>
-    </div> *@
 </div>
-

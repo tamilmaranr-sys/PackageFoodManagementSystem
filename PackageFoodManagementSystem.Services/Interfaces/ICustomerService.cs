@@ -12,5 +12,7 @@ namespace PackageFoodManagementSystem.Services.Interfaces
         Task AddAsync(Customer customer);
         Task UpdateAsync(Customer customer);
         Task DeleteAsync(int id);
+
+        Task<Customer?> GetByUserIdAsync(int userId);
     }
 }

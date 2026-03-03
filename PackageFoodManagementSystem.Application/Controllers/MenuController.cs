@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PackageFoodManagementSystem.Services.Interfaces;
 using System.Collections.Generic;
@@ -19,9 +20,10 @@ namespace PackageFoodManagementSystem.Application.Controllers
             _cartService = cartService;
         }
 
-        
+
 
         // GET: Menu/Index
+        [Authorize(Roles = "User")]
         public IActionResult Index(string? category, string? searchTerm)
 
 {

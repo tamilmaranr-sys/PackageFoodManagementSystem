@@ -1,7 +1,7 @@
 ﻿@{
-
+    // Capture both Action and Controller to distinguish between different "Index" pages
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
 }
 
 <div class="store-sidebar">
@@ -9,67 +9,54 @@
     <ul class="sidebar-menu">
         <li>
             <a asp-controller="StoreManager" asp-action="Home"
-               class="@(currentAction == "Home" ? "active" : "")">
-
+               class="@(currentAction == "Home" && currentController == "StoreManager" ? "active" : "")">
                 🏠 Dashboard
             </a>
         </li>
 
         <li>
+            @* Fixed: Now checks for Index action AND StoreManager1 controller *@
             <a asp-controller="StoreManager1" asp-action="Index"
-               class="@(currentAction == "AddProduct" ? "active" : "")">
-
+               class="@(currentAction == "Index" && currentController == "StoreManager1" ? "active" : "")">
                 📦 Products
             </a>
         </li>
+
         <li>
             <a asp-controller="StoreManager" asp-action="OrdersDashboard"
                class="@(currentAction == "OrdersDashboard" ? "active" : "")">
-
                 🛒 Orders
             </a>
         </li>
-        <li>
-            <a asp-controller="StoreManager" asp-action="Inventory"
-               class="@(currentAction == "Inventory" ? "active" : "")">
-
-                📊 Inventory
-            </a>
-        </li>
-        
 
         <li class="nav-item mb-2">
+            @* Fixed: Now checks for Index action AND Batch controller *@
             <a asp-controller="Batch" asp-action="Index"
-               class="@(currentAction == "Index" ? "active" : "")">
+               class="@(currentAction == "Index" && currentController == "Batch" ? "active" : "")">
                 <span>📦 Manage Batches</span>
             </a>
         </li>
 
-       
         <li>
             <a asp-controller="StoreManager" asp-action="Reports"
                class="@(currentAction == "Reports" ? "active" : "")">
-
                 📑 Reports
             </a>
         </li>
+
         <li>
             <a asp-controller="StoreManager" asp-action="Settings"
                class="@(currentAction == "Settings" ? "active" : "")">
-
                 ⚙ Settings
             </a>
         </li>
+
         <li>
             <a asp-controller="Home" asp-action="Logout"
                class="logout-link"
                onclick="return confirm('Do you want to logout?');">
                 🚪 Log Out
             </a>
-
         </li>
     </ul>
-
-
 </div>
-

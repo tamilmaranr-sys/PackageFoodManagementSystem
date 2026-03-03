@@ -67,27 +67,27 @@
                     <div class="mb-3">
                         <label class="form-label">Full Name</label>
                         <input type="text" name="Name" value="@user.Name" class="form-control" required />
+                        <span class="error edit-name-error"></span>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" name="Email" value="@user.Email" class="form-control" required />
+                        <span class="error edit-email-error"></span>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mobile Number</label>
                         <input type="text" name="MobileNumber" value="@user.MobileNumber" class="form-control" required />
+                        <span class="error edit-mobile-error"></span>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Password</label>
                         <div class="password-wrapper">
-                            <input type="password" id="editUserPassword-@user.Id" name="Password" placeholder="New Password (optional)" class="form-control" />
-                            <button type="button"
-                                    class="toggle-password"
-                                    data-target="editUserPassword-@user.Id"
-                                    aria-label="Show password"
-                                    aria-pressed="false">
-                                <i class="fa fa-eye" aria-hidden="true"></i>
+                            <input type="password" id="editUserPassword-@user.Id" name="Password" class="form-control" />
+                            <button type="button" class="toggle-password" data-target="editUserPassword-@user.Id">
+                                <i class="fa fa-eye"></i>
                             </button>
                         </div>
+                        <span class="error edit-password-error"></span>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Role</label>
@@ -118,29 +118,33 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Full Name</label>
-                    <input type="text" name="Name" class="form-control" required />
+                    <input type="text" id="name" name="Name" class="form-control" required />
+                    <span class="error" id="nameError"></span>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <input type="email" name="Email" class="form-control" required />
+                    <input type="email" id="email" name="Email" class="form-control" required />
+                    <span class="error" id="emailError"></span>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Mobile Number</label>
-                    <input type="text" name="MobileNumber" class="form-control" required />
+                    <input type="text" id="mobilenumber" name="MobileNumber" class="form-control" required />
+                    <span class="error" id="mobileError"></span>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <div class="password-wrapper">
-                        <input type="password" id="addUserPassword" name="Password" placeholder="Password" class="form-control" required />
+                        <input type="password" id="password" name="Password" placeholder="Password" class="form-control" required />
                         <button type="button"
                                 class="toggle-password"
-                                data-target="addUserPassword"
+                                data-target="password"
                                 aria-label="Show password"
                                 aria-pressed="false">
                             <i class="fa fa-eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
+                <span class="error" id="passwordError"></span>
                 <div class="mb-3">
                     <label class="form-label">Role</label>
                     <select name="Role" class="form-select" required>

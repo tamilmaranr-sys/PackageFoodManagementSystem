@@ -126,20 +126,15 @@ $(function () {
     /* --------------------------
      * Logout confirmation
      * -------------------------- */
-    // Direct logout click confirmation
-    document.querySelectorAll(".logout-link").forEach(link => {
-        link.addEventListener("click", function (e) {
-            if (!confirm("Do you want to logout?")) {
-                e.preventDefault();
-            }
-        });
-    });
+
+    // MODIFIED: We removed the direct click listener from here because 
+    // it was conflicting with the enableIntercept logic below.
+    // The confirmation will now be handled by the route/navigation logic.
 
     // Function to enable back/forward interception
     function enableIntercept() {
         const path = window.location.pathname.toLowerCase();
 
-        // Admin routes where back arrow should confirm logout
         const adminRoutes = [
             "/home/admindashboard",
             "/home/users",
@@ -148,14 +143,12 @@ $(function () {
             "/home/report"
         ];
 
-        // Auth routes where forward arrow should confirm login
         const authRoutes = [
             "/home/logout",
             "/home/signin"
         ];
 
         if (adminRoutes.includes(path)) {
-            // Intercept back navigation
             history.pushState(null, "", location.href);
             window.onpopstate = function () {
                 const confirmed = confirm("Do you want to logout?");
@@ -168,7 +161,6 @@ $(function () {
         }
 
         if (authRoutes.includes(path)) {
-            // Intercept forward navigation
             history.pushState(null, "", location.href);
             window.onpopstate = function () {
                 const confirmed = confirm("You need to Login");
@@ -184,7 +176,6 @@ $(function () {
     // Run once when DOM is ready
     document.addEventListener("DOMContentLoaded", enableIntercept);
 
-    // Run again when page is restored from history (back/forward navigation)
+    // Run again when page is restored from history
     window.addEventListener("pageshow", enableIntercept);
-
 });
